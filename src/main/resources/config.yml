@@ -1,0 +1,5 @@
+# VillagerTradeConfig config
+baseCost: 60
+enabled: true
+customCosts:
+    at max level, this enchant costs ->: 12

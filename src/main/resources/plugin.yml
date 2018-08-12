@@ -1,0 +1,16 @@
+name: VillagerTradeMod
+main: com.chromaclypse.villagermod.VillagerTradeMod
+version: ${project.version}
+description: Modify enchanted book trade costs
+author: ezeiger92
+api-version: 1.13
+depend: [ChromaLib]
+commands:
+  villagertrademod:
+    aliases: [vtm]
+    description: Allows trade reloading
+    usage: /<command> reload
+permissions:
+  villagermod.reload:
+    description: Reload settings
+    default: op
