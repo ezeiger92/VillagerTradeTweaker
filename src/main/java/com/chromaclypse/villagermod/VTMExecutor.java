@@ -37,7 +37,7 @@ public class VTMExecutor implements CommandExecutor, TabExecutor {
 	}
 
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		List<String> result = Defaults.List("reload");
+		List<String> result = Defaults.list("reload");
 		
 		if(args.length == 0) {
 			return result;

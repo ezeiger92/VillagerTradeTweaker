@@ -24,7 +24,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.chromaclypse.api.Defaults;
 
 public class VillagerTradeMod extends JavaPlugin implements Listener {
-	Map<UUID, Map<Integer, Integer>> trade_backups = Defaults.<UUID>Keys().Values();
+	Map<UUID, Map<Integer, Integer>> trade_backups = Defaults.emptyMap();
 	
 	VillagerTradeConfig config = new VillagerTradeConfig();
 	VTMExecutor command;
@@ -40,7 +40,7 @@ public class VillagerTradeMod extends JavaPlugin implements Listener {
 		pm.registerEvents(this, this);
 		
 		PluginCommand plug = getCommand("villagertrademod");
-		plug.setAliases(Defaults.List("vtm"));
+		plug.setAliases(Defaults.list("vtm"));
 		plug.setExecutor(command);
 		
 		applyConfig();
@@ -111,7 +111,7 @@ public class VillagerTradeMod extends JavaPlugin implements Listener {
 
 		Villager merch = (Villager)ih;
 		UUID merch_id = merch.getUniqueId();
-		Map<Integer, Integer> backup = Defaults.<Integer>Keys().Values();
+		Map<Integer, Integer> backup = Defaults.emptyMap();
 		boolean modified = false;
 		
 		for(int i = 0; i < merch.getRecipeCount(); ++i)

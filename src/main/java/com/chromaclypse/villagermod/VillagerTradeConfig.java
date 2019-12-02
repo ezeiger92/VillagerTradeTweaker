@@ -9,9 +9,9 @@ public class VillagerTradeConfig extends ConfigObject {
 
 	public int baseCost = 64;
 	public boolean enabled = true;
-	public Map<String, Integer> customCosts = Defaults.Keys(
+	public Map<String, Integer> customCosts = Defaults.keys(
 			"at max level, this enchant costs ->"
-		).Values(
+		).values(
 			12
 		);
 }
