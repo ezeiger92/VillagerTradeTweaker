@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
@@ -22,16 +23,21 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.chromaclypse.api.Defaults;
+import com.chromaclypse.api.command.CommandBase;
 
 public class VillagerTradeMod extends JavaPlugin implements Listener {
 	Map<UUID, Map<Integer, Integer>> trade_backups = Defaults.emptyMap();
 	
 	VillagerTradeConfig config = new VillagerTradeConfig();
-	VTMExecutor command;
 
 	@Override
 	public void onEnable() {
-		command = new VTMExecutor(this);
+		VTMExecutor vtm = new VTMExecutor(this);
+		TabExecutor command = new CommandBase()
+				.with().arg("reload").calls(vtm::reload)
+				.with().arg("version").calls(CommandBase::pluginVersion)
+				.getCommand();
+		
 		if(!getDataFolder().exists())
 			saveDefaultConfig();
 		
@@ -40,8 +46,8 @@ public class VillagerTradeMod extends JavaPlugin implements Listener {
 		pm.registerEvents(this, this);
 		
 		PluginCommand plug = getCommand("villagertrademod");
-		plug.setAliases(Defaults.list("vtm"));
 		plug.setExecutor(command);
+		plug.setTabCompleter(command);
 		
 		applyConfig();
 	}

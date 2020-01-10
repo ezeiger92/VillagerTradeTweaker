@@ -10,6 +10,7 @@ commands:
     aliases: [vtm]
     description: Allows trade reloading
     usage: /<command> reload
+    permission: villagermod.reload
 permissions:
   villagermod.reload:
     description: Reload settings
