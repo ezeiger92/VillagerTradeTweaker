@@ -10,7 +10,7 @@ public class TradeProperties {
 	}
 	
 	private int getInt(String key, int limit) {
-		return (villager.getUniqueId() + key).hashCode() % limit;
+		return (villager.getUniqueId() + key).hashCode() % limit; // Use tracked UUID instead
 	}
 	
 	private int getVaryingInt(String key, int scale, int limit) {
