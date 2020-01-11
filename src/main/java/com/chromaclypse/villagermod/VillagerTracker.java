@@ -13,47 +13,73 @@ import org.bukkit.plugin.Plugin;
 
 public class VillagerTracker {
 
-	private final NamespacedKey TRACKED_UUID;
-	private final PersistentUUID serializer = new PersistentUUID();
+	private final NamespacedKey TRACKED_DATA;
+	private final VillagerSerializer serializer = new VillagerSerializer();
+	
+	private static long globalTickTime() {
+		return System.currentTimeMillis() / (1000 / 20);
+	}
+	
+	private static long spawnTime(Entity entity) {
+		return globalTickTime() - entity.getTicksLived();
+	}
 	
 	public VillagerTracker(Plugin handle) {
-		TRACKED_UUID = new NamespacedKey(handle, "origin_uuid");
+		TRACKED_DATA = new NamespacedKey(handle, "origin_uuid");
 	}
 	
 	private boolean hasTrackedUUID(Entity entity) {
-		return entity.getPersistentDataContainer().has(TRACKED_UUID, serializer);
+		return entity.getPersistentDataContainer().has(TRACKED_DATA, serializer);
 	}
 	
-	private UUID getTrackedUUID(Entity entity) {
-		return entity.getPersistentDataContainer().get(TRACKED_UUID, serializer);
+	private Data getTrackedData(Entity entity) {
+		return entity.getPersistentDataContainer().get(TRACKED_DATA, serializer);
 	}
 	
-	private void setTrackedUUID(Entity entity, UUID uuid) {
-		entity.getPersistentDataContainer().set(TRACKED_UUID, serializer, uuid);
+	private void setTrackedData(Entity entity, Data data) {
+		entity.getPersistentDataContainer().set(TRACKED_DATA, serializer, data);
 	}
 	
-	public Optional<UUID> getTrackedVillagerUUID(Entity entity) {
+	public Optional<Data> getTrackedVillagerUUID(Entity entity) {
 		if(!hasTrackedUUID(entity)) {
 			if(!(entity instanceof Villager)) {
 				return Optional.empty();
 			}
 			
-			setTrackedUUID(entity, entity.getUniqueId());
+			setTrackedData(entity, new Data(entity.getUniqueId(), spawnTime(entity)));
 		}
 		
-		return Optional.of(getTrackedUUID(entity));
+		return Optional.of(getTrackedData(entity));
 	}
 	
-	public boolean trackVillagerTransformation(UUID villagerUUID, Entity newEntity) {
+	public boolean trackVillagerTransformation(Data villagerData, Entity newEntity) {
 		if(hasTrackedUUID(newEntity)) {
 			return false;
 		}
 		
-		setTrackedUUID(newEntity, villagerUUID);
+		setTrackedData(newEntity, villagerData);
 		return true;
 	}
 	
-	private static class PersistentUUID implements PersistentDataType<byte[], UUID> {
+	public static class Data {
+		private final UUID uuid;
+		private final long spawnTicks;
+		
+		public Data(UUID uuid, long spawnTicks) {
+			this.uuid = uuid;
+			this.spawnTicks = spawnTicks;
+		}
+		
+		public UUID getTrackedUUID() {
+			return uuid;
+		}
+		
+		public long getTradeTimer() {
+			return globalTickTime() - spawnTicks;
+		}
+	}
+	
+	private static class VillagerSerializer implements PersistentDataType<byte[], Data> {
 
 		@Override
 		public Class<byte[]> getPrimitiveType() {
@@ -61,23 +87,25 @@ public class VillagerTracker {
 		}
 
 		@Override
-		public Class<UUID> getComplexType() {
-			return UUID.class;
+		public Class<Data> getComplexType() {
+			return Data.class;
 		}
 
 		@Override
-		public byte[] toPrimitive(UUID complex, PersistentDataAdapterContext context) {
-			ByteBuffer buffer = ByteBuffer.allocate(16);
-			buffer.putLong(complex.getMostSignificantBits());
-			buffer.putLong(complex.getLeastSignificantBits());
+		public byte[] toPrimitive(Data complex, PersistentDataAdapterContext context) {
+			ByteBuffer buffer = ByteBuffer.allocate(20);
+			buffer.putLong(complex.uuid.getMostSignificantBits());
+			buffer.putLong(complex.uuid.getLeastSignificantBits());
+			buffer.putLong(complex.spawnTicks);
+			
 			return buffer.array();
 		}
 
 		@Override
-		public UUID fromPrimitive(byte[] primitive, PersistentDataAdapterContext context) {
+		public Data fromPrimitive(byte[] primitive, PersistentDataAdapterContext context) {
 			ByteBuffer buffer = ByteBuffer.wrap(primitive);
 			
-			return new UUID(buffer.getLong(0), buffer.getLong(1));
+			return new Data(new UUID(buffer.getLong(0), buffer.getLong(1)), buffer.getLong(2));
 		}
 	}
 }
